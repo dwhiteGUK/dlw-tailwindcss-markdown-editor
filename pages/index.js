@@ -1,64 +1,72 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import * as React from 'react';
+import Head from 'next/head';
+import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
+
+import useDebounce from '../hooks/useDebounce';
+
+const defaultMarkdown = `A paragraph with *emphasis* and **strong importance**.
+
+> A block quote with ~strikethrough~ and a URL: https://reactjs.org.`
 
 export default function Home() {
+  const [status, setStatus] = React.useState('write');
+  const [markdown, setMarkdown] = React.useState(defaultMarkdown);
+
+  const value = useDebounce(markdown, 250);
+
   return (
-    <div className={styles.container}>
+    <div className="flex flex-col align-center justify-between h-screen bg-white">
       <Head>
         <title>Create Next App</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+      <main className="flex flex-col h-full m-auto py-10 px-5">
+        <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl p-10">
+          Markdown Editor
         </h1>
+        <div className="flex flex-col items-start">
+          <nav className="flex space-x-2" aria-label="Tabs">
+            <button
+              type="button"
+              className={`${status === 'write' ? 'bg-red-100 text-red-700' : 'text-gray-500'} hover:text-gray-700 px-3 py-2 font-medium text-sm rounded-md`}
+              onClick={() => setStatus('write')}
+            >
+              Write
+            </button>
+            <button
+              type="button"
+              className={`${status === 'preview' ? 'bg-red-100 text-red-700' : 'text-gray-500'} hover:text-gray-700 px-3 py-2 font-medium text-sm rounded-md`}
+              onClick={() => setStatus('preview')}
+            >
+              Preview
+            </button>
+          </nav>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+          <div className="relative w-full h-64">
+            <div className={`${status === 'write' ? 'z-10' : '-z-10'} absolute inset-0 py-1 h-full`}>
+              <label htmlFor="editor" className="sr-only">Editor</label>
+              <textarea
+                id="editor"
+                name="editor"
+                className="shadow-sm focus:ring-red-500 focus:border-red-500 p-1 block w-full h-full sm:text-sm border border-gray-300 rounded-md"
+                placeholder="Enter text using markdown here"
+                onChange={(e) => setMarkdown(`${e.target.value}`)}
+                defaultValue={value}
+              />
+            </div>
+            <div className={`${status === 'preview' ? 'z-10' : '-z-10'} absolute inset-0 py-1 h-full`}>
+              <div className="shadow-sm focus:ring-red-500 focus:border-red-500 p-1 block w-full h-full sm:text-sm border border-gray-300 rounded-md overflow-y-scroll prose">
+                <ReactMarkdown plugins={[gfm]} children={value} />
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
+      <footer className="flex justify-center align-center p-3">
+        demo by dlw.dev
       </footer>
     </div>
   )
